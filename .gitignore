@@ -3,4 +3,4 @@ env
 .git/config
 document_portal.egg-info
 logging/custom_logger.py
-
+data
