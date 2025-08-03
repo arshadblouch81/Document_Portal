@@ -1,6 +1,14 @@
-env
-.env
+venv/
 .git/config
 document_portal.egg-info
 logging/custom_logger.py
-
+__pycache__/
+env
+.env
+document_portal.egg-info
+venv/
+__pycache__/
+logs/
+*.pyc
+test.py
+data
