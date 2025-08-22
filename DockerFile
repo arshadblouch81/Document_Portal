@@ -19,6 +19,9 @@ COPY .env .
 # Copy project files
 COPY . .
 
+# copy config file
+COPY config/config.yaml config/config.yaml
+
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
