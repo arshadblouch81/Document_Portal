@@ -8,6 +8,7 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain.output_parsers import OutputFixingParser
 from prompt.prompt_library import *
 
+
 class DocumentAnalyzer:
     """
     Analyzes documents using a pre-trained model.
@@ -42,10 +43,18 @@ class DocumentAnalyzer:
             chain = self.prompt | self.llm | self.fixing_parser
             
             self.log.info("Meta-data analysis chain initialized")
+            
+            CONFIG = {'configurable': {'thread_id': 'thread-1'},
+                    'metadata' :{
+                        'thread_id': 'thread-1'
+                    },
+                    'run_name' : 'doc_analysis_turn'
+                    }
 
             response = chain.invoke({
                 "format_instructions": self.parser.get_format_instructions(),
-                "document_text": document_text
+                "document_text": document_text,
+                "config": CONFIG
             })
 
             self.log.info("Metadata extraction successful", keys=list(response.keys()))
@@ -55,5 +64,3 @@ class DocumentAnalyzer:
         except Exception as e:
             self.log.error("Metadata analysis failed", error=str(e))
             raise DocumentPortalException("Metadata extraction failed") from e
-        
-    

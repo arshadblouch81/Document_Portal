@@ -1,14 +1,15 @@
 /* ====== THEME ====== */
 :root{
-  --bg:#0b0f16;
+  --bg:#e0eafc;
   --bg-grad: radial-gradient(1200px 600px at 10% -20%, rgba(91,115,255,.15), transparent 40%),
              radial-gradient(900px 500px at 90% -30%, rgba(61,215,182,.12), transparent 40%),
-             linear-gradient(180deg, #0b0f16 0%, #0a0d12 100%);
-  --surface:#0f1622;
+             linear-gradient(180deg, #e0eafc 0%, #e0eafc 100%);
+           
+  --surface:#e0eafc;
   --glass: rgba(20,28,40,.7);
-  --text:#e8ecf3;
+  --text:#303338;
   --muted:#9aa5b1;
-  --border:#1b2432;
+  --border:#053179;
   --accent:#7c9aff;
   --accent-2:#3dd7b6;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
@@ -21,7 +22,8 @@
 html,body{height:100%}
 body{
   margin:0;
-  background:var(--bg-grad);
+  /* background:var(--bg-grad); */
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
   color:var(--text);
   font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
   -webkit-font-smoothing:antialiased;
@@ -34,7 +36,7 @@ body{
   display:flex; align-items:center; justify-content:space-between;
   padding:16px 22px;
   backdrop-filter: blur(10px);
-  background:linear-gradient(180deg, rgba(10,14,22,.85), rgba(10,14,22,.65));
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
   border-bottom:1px solid var(--border);
 }
 .brand{display:flex; align-items:center; gap:12px}
@@ -46,7 +48,7 @@ body{
 .tab-btn{
   position:relative;
   border:1px solid var(--border);
-  background:linear-gradient(180deg,#101724,#0b111b);
+background: linear-gradient(to right, #e0eafc, #cfdef3);
   color:var(--text);
   padding:10px 14px;
   border-radius:14px;
@@ -56,10 +58,11 @@ body{
 .tab-btn:hover{transform:translateY(-1px); border-color:#2a3445}
 .tab-btn.active{
   border-color:transparent;
+  color: #fff;
   background:
     linear-gradient(180deg, rgba(124,154,255,.15), rgba(61,215,182,.12)),
-    linear-gradient(180deg,#101724,#0b111b);
-  box-shadow: inset 0 0 0 1px rgba(124,154,255,.35);
+    linear-gradient(180deg,#2e559c,#0c64df);
+  box-shadow: inset 0 0 0 1px #1466da;
 }
 
 /* ====== LAYOUT ====== */
@@ -79,7 +82,8 @@ body{
   background: radial-gradient(600px 200px at 10% 0%, rgba(124,154,255,.08), transparent 40%);
   pointer-events:none;
 }
-h2{margin:0 0 6px 0; font-size:20px}
+h2{margin:0 0 6px 0; font-size:20px; color : #fff}
+h3{margin:0 0 6px 0; font-size:16px; color : #fff}
 .muted{color:var(--muted)}
 .small{font-size:12px}
 .tiny{font-size:11px; color:var(--muted)}
@@ -96,10 +100,10 @@ h2{margin:0 0 6px 0; font-size:20px}
 .grid-3{display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; margin-top:8px}
 
 .field{display:flex; flex-direction:column; gap:8px}
-label{font-size:13px; color:#cfd6e4; letter-spacing:.2px}
+label{font-size:13px; color:#cddaf0; letter-spacing:.2px}
 
 input[type="text"], input[type="number"]{
-  background:linear-gradient(180deg,#0d1420,#0a1018);
+  background:linear-gradient(180deg,#cfdef3,#97bae9);
   color:var(--text);
   border:1px solid var(--border);
   border-radius:14px;
@@ -113,15 +117,15 @@ input[type="text"]:focus, input[type="number"]:focus{
 }
 
 input[type="file"]{
-  background:linear-gradient(180deg,#0d1420,#0a1018);
+  background:linear-gradient(180deg,#e1e9f5,#e7f3ff);
   color:var(--muted);
-  border:1px dashed #2a3141;
+  border:1px dashed rgb(29, 56, 119);
   border-radius:14px;
   padding:12px;
   cursor:pointer;
   transition:border-color .2s ease, background .2s ease;
 }
-input[type="file"]:hover{border-color:#38455e; background:#0c131d}
+input[type="file"]:hover{border-color:#eff1f5; background:#dddddd}
 
 .help{color:var(--muted); font-size:12px}
 
@@ -129,14 +133,14 @@ input[type="file"]:hover{border-color:#38455e; background:#0c131d}
 .btn{
   display:inline-flex; align-items:center; gap:8px;
   border:1px solid var(--border);
-  background:linear-gradient(180deg,#101724,#0b111b);
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
   color:var(--text);
   padding:11px 14px;
   border-radius:14px;
   cursor:pointer; user-select:none;
   transition:transform .12s ease, border-color .2s ease, box-shadow .2s ease, filter .2s;
 }
-.btn:hover{transform:translateY(-1px); border-color:#2a3445}
+.btn:hover{transform:translateY(-1px); border-color:#0653aa}
 .btn:active{transform:translateY(0)}
 .btn.primary{
   background:linear-gradient(135deg, var(--accent) 0%, #4ea2ff 100%);
@@ -148,8 +152,8 @@ input[type="file"]:hover{border-color:#38455e; background:#0c131d}
 /* ====== RESULTS ====== */
 .result-block{margin-top:18px}
 pre.code{
-  background:linear-gradient(180deg,#0a0f16,#070b11);
-  color:#e8f0ff;
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
+  color:#0d1420;
   border:1px solid var(--border);
   border-radius:var(--radius-sm);
   padding:14px; overflow:auto; max-height:420px;
@@ -160,21 +164,21 @@ pre.code{
   overflow:auto;
   border:1px solid var(--border);
   border-radius:var(--radius-sm);
-  background:linear-gradient(180deg,#0b111a,#0a0f16);
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
 }
 table{width:100%; border-collapse:collapse; font-size:14px}
 th, td{padding:12px 12px; border-bottom:1px solid #152031; vertical-align:top}
 thead th{
   position:sticky; top:0; z-index:1;
-  background:linear-gradient(180deg,#0f1622,#0c121b);
-  color:#d7deea; letter-spacing:.3px; text-align:left;
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
+  color:#0d1420; letter-spacing:.3px; text-align:left;
 }
 tbody tr{transition:background .15s ease}
 tbody tr:hover td{background:rgba(124,154,255,.05)}
 
 /* Answer bubble */
 .answer{
-  background:linear-gradient(180deg,#0d1520,#0a111a);
+  background: linear-gradient(to right, #e0eafc, #cfdef3);
   border:1px solid var(--border);
   border-radius:var(--radius-sm);
   padding:14px; min-height:60px;
@@ -187,7 +191,7 @@ tbody tr:hover td{background:rgba(124,154,255,.05)}
 .switch input{display:none}
 .slider{
   position:absolute; inset:0; cursor:pointer;
-  background:#2a3141; border-radius:999px; transition:.2s ease;
+  background:#cfdef3; border-radius:999px; transition:.2s ease;
 }
 .slider:before{
   content:""; position:absolute; top:3px; left:3px; height:20px; width:20px;

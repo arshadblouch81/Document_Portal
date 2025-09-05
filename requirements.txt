@@ -16,5 +16,21 @@ uvicorn==0.35.0
 python-multipart==0.0.20
 docx2txt==0.9
 pypdf==5.9.0
+pytesseract==0.3.13
+pdfplumber==0.11.7
+python-docx==1.2.0
+docx==0.2.4
+python-pptx==1.0.2
+XlsxWriter==3.2.5
+deepeval==3.4.1,
+jinja2==3.1.6
+google-generativeai
+Pillow==9.5.0
+python-multipart
+bcrypt==4.3.0
+ecdsa==0.19.1
+passlib==1.7.4
+python-jose==3.5.0
+redis==6.4.0
 
 -e .

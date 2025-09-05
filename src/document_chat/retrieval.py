@@ -171,3 +171,4 @@ class ConversationalRAG:
         except Exception as e:
             self.log.error("Failed to build LCEL chain", error=str(e), session_id=self.session_id)
             raise DocumentPortalException("Failed to build LCEL chain", sys)
+

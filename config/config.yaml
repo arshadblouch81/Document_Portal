@@ -21,3 +21,18 @@ llm:
     model_name: "gemini-2.0-flash"
     temperature: 0
     max_output_tokens: 2048
+
+image_reader_llm:
+  groq:
+    provider: "groq"
+    model_name: "deepseek-r1-distill-llama-70b"
+    temperature: 0
+    max_output_tokens: 2048
+  google:
+    provider: "google"  
+    model_name : "gemini-1.5-pro"
+    temperature: 0.7
+    top_p: 0.95
+    top_k: 40
+    max_output_tokens: 1024
+    response_mime_type: "text/plain"

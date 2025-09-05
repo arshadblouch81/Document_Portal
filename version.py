@@ -17,7 +17,14 @@ packages = [
     "uvicorn",
     "python-multipart",
     "docx2txt",
-    "pypdf"
+    "pypdf",
+    "pytesseract",
+    "pdfplumber",
+    "docx",
+    "python-pptx",
+    "deepeval",
+    "jinja2"
+    
 ]
 for pkg in packages:
     try:

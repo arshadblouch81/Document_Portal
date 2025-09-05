@@ -6,11 +6,13 @@ from datetime import datetime, timezone
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 
-
+SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql"}
 class DocumentIngestion:
     """
     Handles saving, reading, and combining of PDFs for comparison with session-based versioning.
     """
+
+  
 
     def __init__(self, base_dir: str = "data/document_compare", session_id=None):
         self.log = CustomLogger().get_logger(__name__)
@@ -29,8 +31,8 @@ class DocumentIngestion:
             ref_path = self.session_path / reference_file.name
             act_path = self.session_path / actual_file.name
 
-            if not reference_file.name.lower().endswith(".pdf") or not actual_file.name.lower().endswith(".pdf"):
-                raise ValueError("Only PDF files are allowed.")
+            if reference_file.name.lower() not in SUPPORTED_EXTENSIONS :
+                raise ValueError("Only supported file types are allowed.")
 
             with open(ref_path, "wb") as f:
                 f.write(reference_file.getbuffer())

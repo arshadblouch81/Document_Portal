@@ -20,6 +20,7 @@
       <button class="tab-btn active" data-tab="analysis">Document Analysis</button>
       <button class="tab-btn" data-tab="compare">Document Compare</button>
       <button class="tab-btn" data-tab="chat">Doc Chat</button>
+      <button class="tab-btn"  id="btnlogout">Log Out</button>
     </nav>
   </header>
 
@@ -28,12 +29,12 @@
     <section id="tab-analysis" class="tab-panel active">
       <div class="card">
         <h2>🔎 Analyze a Document</h2>
-        <p class="muted">Upload a PDF and get structured analysis.</p>
+        <p class="muted">Upload a file and get structured analysis.</p>
         <form id="form-analyze" class="form-grid" onsubmit="return false;">
           <div class="field">
-            <label for="an-file">Upload PDF</label>
-            <input id="an-file" type="file" accept=".pdf" required />
-            <small class="help">Only .pdf files</small>
+            <label for="an-file">Upload File</label>
+            <input id="an-file" type="file" accept=".pdf,.docx,.txt,.md,.ppt,.pptx,.xlsx,.csv,.sql,.jpg,.png,.jpeg,.gif,.tiff,.bmp,.webp,.svg" required />
+            <small class="help">Only .pdf, .docx, .txt, .md, .ppt, .pptx, .xlsx, .csv, .sql, .jpg, .png, .jpeg, .gif, .tiff, .bmp, .webp, .svg files</small>
           </div>
           <div class="actions">
             <button id="btn-analyze" class="btn primary">Run Analysis</button>
@@ -50,15 +51,15 @@
     <section id="tab-compare" class="tab-panel">
       <div class="card">
         <h2>🆚 Compare Two Documents</h2>
-        <p class="muted">Upload a reference PDF and an actual PDF to see page-wise differences.</p>
+        <p class="muted">Upload a reference file and an actual file to see page-wise differences.</p>
         <form id="form-compare" class="form-grid-2" onsubmit="return false;">
           <div class="field">
-            <label for="cmp-ref">Reference PDF</label>
-            <input id="cmp-ref" type="file" accept=".pdf" required />
+            <label for="cmp-ref">Reference File</label>
+            <input id="cmp-ref" type="file" accept=".pdf, .docx, .txt, .md, .ppt, .pptx, .xlsx, .csv, .sql, .jpg, .png, .jpeg, .gif, .tiff, .bmp, .webp, .svg" required />
           </div>
           <div class="field">
-            <label for="cmp-act">Actual PDF</label>
-            <input id="cmp-act" type="file" accept=".pdf" required />
+            <label for="cmp-act">Actual File</label>
+            <input id="cmp-act" type="file" accept=".pdf, .docx, .txt, .md, .ppt, .pptx, .xlsx, .csv, .sql, .jpg, .png, .jpeg, .gif, .tiff, .bmp, .webp, .svg" required />
           </div>
           <div class="actions span-2">
             <button id="btn-compare" class="btn primary">Compare</button>
@@ -85,12 +86,12 @@
     <section id="tab-chat" class="tab-panel">
       <div class="card">
         <h2>💬 Chat with your Documents</h2>
-        <p class="muted">Upload PDF/DOCX/TXT; we’ll index to FAISS and enable RAG chat.</p>
+        <p class="muted">Upload PDF/DOCX/TXT/MD/PPT/PPTX/XLSX/CSV/SQL; we’ll index to FAISS and enable RAG chat.</p>
 
         <form id="form-chat-index" class="form-grid" onsubmit="return false;">
           <div class="field">
             <label for="chat-files">Upload files</label>
-            <input id="chat-files" type="file" multiple accept=".pdf,.docx,.txt" />
+            <input id="chat-files" type="file" multiple accept=".pdf, .docx, .txt, .md, .ppt, .pptx, .xlsx, .csv, .sql, .jpg, .png, .jpeg, .gif, .tiff, .bmp, .webp, .svg" />
             <small class="help">You can select multiple files.</small>
           </div>
 
@@ -146,6 +147,16 @@
           <h3>Answer</h3>
           <div class="answer" id="chat-answer">No answer yet.</div>
         </div>
+        <div>
+          <h2>DeepEval Metrics</h2>
+          <table id="metricsTable">
+            <thead>
+              <tr><th>Metric</th><th>Score</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+
+        </div>
       </div>
     </section>
   </main>
@@ -189,6 +200,7 @@
       }
       const json = await res.json();
       out.textContent = JSON.stringify(json, null, 2);
+      loadMetrics();
     } catch (e) {
       out.textContent = "Error: " + (e.message || e);
     }
@@ -276,6 +288,7 @@
     const ans      = document.getElementById("chat-answer");
     const useSess  = document.getElementById("chat-sessionized").checked;
     const k        = +document.getElementById("chat-k").value || 5;
+    
 
     if (!q) { ans.textContent = "Please enter a question."; return; }
     if (useSess && !currentSession) {
@@ -298,11 +311,41 @@
         throw new Error(err.detail || `HTTP ${res.status}`);
       }
       const json = await res.json(); // { answer, ... }
-      ans.textContent = json.answer || "No answer.";
+      ans.textContent = json.answer    || "No answer.";
+      loadMetrics(json.deepEval);
     } catch (e) {
       ans.textContent = "Query failed: " + (e.message || e);
     }
   });
+
+    document.getElementById("btnlogout").addEventListener("click", async () => {
+    
+    try {
+        window.location.href = "/";
+
+      const res = await fetch(`${API_BASE}/logout`, { method: "POST", body: fd });
+      if (res.ok) {
+          window.location.href = "/";        
+      }
+      ans.textContent = "logout failed: " + (e.message || e);
+      
+    } catch (e) {
+      ans.textContent = "logout failed: " + (e.message || e);
+    }
+  });
+
+   async function loadMetrics(response) {
+      
+      const data = await response.json();
+      const tbody = document.querySelector("#metricsTable tbody");
+      tbody.innerHTML = "";
+
+      for (const [metric, score] of Object.entries(data)) {
+        const row = `<tr><td>${metric}</td><td>${(score * 100).toFixed(2)}%</td></tr>`;
+        tbody.innerHTML += row;
+      }
+    }
+
 </script>
 
 </body>

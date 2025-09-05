@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login Portal</title>
+   
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Google Fonts for classy look -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/static/login.css" rel="stylesheet" />
+  
+</head>
+<body>
+    <div class="login-box">
+
+        <div class="login-head">
+        <img src="static/login-icon.jpg" alt="Login Icon" class="login-icon" />
+        <h2>Login</h2>
+        </div>
+
+        <input type="text" id="username" placeholder="Username" />
+        <input type="password" id="password" placeholder="Password" />
+        <div class="btn-panel">
+            <button id="btn-login" onclick="login()">Login</button>
+
+            <div class="error" id="error"></div>
+        </div>
+
+    </div>
+
+    <script>
+    
+    async function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    try {
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ "username": username, "password": password }),
+            credentials: "include"  // 👈 This is the key!
+        });
+        const status = response.status;
+        const result = '' // await response.json();
+        
+        if (response.ok) {
+            window.location.href = "/dashboard?user=" + encodeURIComponent(username);
+        } else {
+            console.error("Login failed:", result);
+            document.getElementById("error").innerText = result.detail || "Login failed";
+        }
+    } catch (err) {
+        console.error("Fetch error:", err);
+        document.getElementById("error").innerText = err;
+    }
+}
+
+    </script>
+</body>
+</html>

@@ -1,9 +1,12 @@
 from __future__ import annotations
+import io
 import os
 import sys
 import json
+# from turtle import pd
 import uuid
 import hashlib
+import pandas as pd
 import shutil
 from pathlib import Path
 from typing import Iterable, List, Optional, Dict, Any
@@ -15,9 +18,19 @@ from utils.model_loader import ModelLoader
 from logger import GLOBAL_LOGGER as log
 from exception.custom_exception import DocumentPortalException
 from utils.file_io import generate_session_id, save_uploaded_files
-from utils.document_ops import load_documents, concat_for_analysis, concat_for_comparison
+from utils.document_ops import load_documents
+import sqlite3
+import pytesseract
+from PIL import Image
+import textwrap
+import cv2
+import numpy as np
 
-SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt"}
+
+
+SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
+IMAGE_FILES = {".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
+
 
 # FAISS Manager (load-or-create)
 class FaissManager:
@@ -102,7 +115,7 @@ class ChatIngestor:
     ):
         try:
             self.model_loader = ModelLoader()
-            
+           
             self.use_session = use_session_dirs
             self.session_id = session_id or generate_session_id()
             
@@ -144,12 +157,13 @@ class ChatIngestor:
         try:
             paths = save_uploaded_files(uploaded_files, self.temp_dir)
             docs = load_documents(paths)
+           
             if not docs:
                 raise ValueError("No valid documents loaded")
             
             chunks = self._split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
             
-            ## FAISS manager very very important class for the docchat
+            ## FAISS manager very important class for the docchat
             fm = FaissManager(self.faiss_dir, self.model_loader)
             
             texts = [c.page_content for c in chunks]
@@ -169,50 +183,155 @@ class ChatIngestor:
             log.error("Failed to build retriever", error=str(e))
             raise DocumentPortalException("Failed to build retriever", e) from e
 
-            
-        
-            
+    
+
 class DocHandler:
     """
-    PDF save + read (page-wise) for analysis.
+    File save + read (page-wise) for analysis.
     """
     def __init__(self, data_dir: Optional[str] = None, session_id: Optional[str] = None):
         self.data_dir = data_dir or os.getenv("DATA_STORAGE_PATH", os.path.join(os.getcwd(), "data", "document_analysis"))
         self.session_id = session_id or generate_session_id("session")
         self.session_path = os.path.join(self.data_dir, self.session_id)
         os.makedirs(self.session_path, exist_ok=True)
+        self.model_loader = ModelLoader()
         log.info("DocHandler initialized", session_id=self.session_id, session_path=self.session_path)
 
-    def save_pdf(self, uploaded_file) -> str:
+    def save_file(self, uploaded_file) -> str:
         try:
             filename = os.path.basename(uploaded_file.name)
-            if not filename.lower().endswith(".pdf"):
-                raise ValueError("Invalid file type. Only PDFs are allowed.")
+            # if not (filename.endswith(tuple(SUPPORTED_EXTENSIONS)) or filename.endswith(tuple(IMAGE_FILES))):
+                # raise ValueError("Invalid file type. Only supported file types are allowed.")
             save_path = os.path.join(self.session_path, filename)
             with open(save_path, "wb") as f:
                 if hasattr(uploaded_file, "read"):
                     f.write(uploaded_file.read())
                 else:
                     f.write(uploaded_file.getbuffer())
-            log.info("PDF saved successfully", file=filename, save_path=save_path, session_id=self.session_id)
+            log.info("File saved successfully", file=filename, save_path=save_path, session_id=self.session_id)
             return save_path
         except Exception as e:
-            log.error("Failed to save PDF", error=str(e), session_id=self.session_id)
-            raise DocumentPortalException(f"Failed to save PDF: {str(e)}", e) from e
+            log.error("Failed to save file", error=str(e), session_id=self.session_id)
+            raise DocumentPortalException(f"Failed to save file: {str(e)}", e) from e
 
-    def read_pdf(self, pdf_path: str) -> str:
+    def read_file(self, file_path: str) -> str:
         try:
+       
+            if Path(file_path).suffix.lower() == ".csv":
+                 return self.read_csv_file(file_path)
+            if Path(file_path).suffix.lower() == ".sql":
+                 return self.execute_sql_file(file_path)
+            if Path(file_path).suffix.lower() in  tuple(IMAGE_FILES):
+                 return self.read_image_file(file_path)
             text_chunks = []
-            with fitz.open(pdf_path) as doc:
+            with fitz.open(file_path) as doc:
                 for page_num in range(doc.page_count):
                     page = doc.load_page(page_num)
                     text_chunks.append(f"\n--- Page {page_num + 1} ---\n{page.get_text()}")  # type: ignore
             text = "\n".join(text_chunks)
-            log.info("PDF read successfully", pdf_path=pdf_path, session_id=self.session_id, pages=len(text_chunks))
+            log.info("File read successfully", file_path=file_path, session_id=self.session_id, pages=len(text_chunks))
             return text
         except Exception as e:
-            log.error("Failed to read PDF", error=str(e), pdf_path=pdf_path, session_id=self.session_id)
-            raise DocumentPortalException(f"Could not process PDF: {pdf_path}", e) from e
+            log.error("Failed to read file", error=str(e), file_path=file_path, session_id=self.session_id)
+            raise DocumentPortalException(f"Could not process file: {file_path}", e) from e
+    
+    def read_csv_file(self, file_path: str) -> str:
+        try:
+            
+            text_chunks = []
+            df = pd.read_csv(file_path)
+            text_chunks = []
+
+            for i in range(0, len(df), 10):  # step by 10
+                page = df.iloc[i:i+10]
+                text_chunks.append(f"\n--- Page {i//10 + 1} ---\n{page.to_string(index=False)}")
+            text = "\n".join(text_chunks)
+            log.info("File read successfully", file_path=file_path, session_id=self.session_id, pages=len(text_chunks))
+            return text
+        except Exception as e:
+            log.error("Failed to read file", error=str(e), file_path=file_path, session_id=self.session_id)
+            raise DocumentPortalException(f"Could not process file: {file_path}", e) from e
+        
+    def execute_sql_file(self,file_path: str):
+        connection = sqlite3.connect('my_database.db')
+        with open(file_path, 'r', encoding='utf-8') as f:
+            sql_script = f.read()
+
+        cursor = connection.cursor()
+        cursor.executescript(sql_script)  # For SQLite
+        connection.commit()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT name
+            FROM sqlite_master 
+            WHERE type='table' AND name NOT LIKE 'sqlite_%'
+        """)
+        tables = cursor.fetchall()  # Get all table names
+    
+        documents: list[Document] = []
+
+        for table in tables:
+            table_name = table[0]
+            try:
+                cursor.execute(f"SELECT * FROM {table_name}")
+                rows = cursor.fetchall()
+                columns = [desc[0] for desc in cursor.description]
+                for idx, row in enumerate(rows[:10], start=1):
+                    # Format each column-value pair with indentation for clarity
+                    content_lines = [f"{col}: {val}" for col, val in zip(columns, row)]
+                    content = "\n".join(content_lines)
+
+                    # Create Document with metadata including row index
+                    doc = Document(
+                        page_content=content,
+                        metadata={
+                            "source_table": table_name,
+                            "row_index": idx
+                        }
+                    )
+                    documents.append(doc)
+            except Exception as e:
+                print(f"Failed to fetch data from table '{table_name}': {e}")
+        cursor.close()    
+        connection.close()
+        return documents
+
+    def preprocess_image(self, file_path):
+        img = cv2.imread(file_path)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        return Image.fromarray(thresh)
+
+    def read_image_file(self, file_path: str) -> str:
+        try:
+            # Load image
+            image = self.preprocess_image(file_path) #Image.open(file_path)
+
+            # Extract text using OCR
+            model = self.model_loader.load_img_reader_llm()
+            raw_text = model.generate_content([
+                        image,
+                        "Extract all visible text from this image. Include handwritten and printed text."
+                    ])
+
+            # raw_text = pytesseract.image_to_string(image)
+
+            # Split text into chunks of ~500 characters (adjust as needed)
+            wrapped_chunks = textwrap.wrap(raw_text.text, width=500)
+            text_chunks = []
+
+            for i, chunk in enumerate(wrapped_chunks):
+                text_chunks.append(f"\n--- Page {i + 1} ---\n{chunk}")
+
+            text = "\n".join(text_chunks)
+
+            log.info("Image read successfully", file_path=file_path, session_id=self.session_id, pages=len(text_chunks))
+            return text
+
+        except Exception as e:
+            log.error("Failed to read image", error=str(e), file_path=file_path, session_id=self.session_id)
+            raise DocumentPortalException(f"Could not process image: {file_path}", e) from e
+
 class DocumentComparator:
     """
     Save, read & combine PDFs for comparison with session-based versioning.
@@ -222,49 +341,179 @@ class DocumentComparator:
         self.session_id = session_id or generate_session_id()
         self.session_path = self.base_dir / self.session_id
         self.session_path.mkdir(parents=True, exist_ok=True)
+        self.model_loader = ModelLoader()
         log.info("DocumentComparator initialized", session_path=str(self.session_path))
-
+       
+    
+    def save_file(self, uploaded_file) -> str:
+        try:
+            filename = os.path.basename(uploaded_file.name)
+            # if not (filename.endswith(tuple(SUPPORTED_EXTENSIONS)) or filename.endswith(tuple(IMAGE_FILES))):
+                # raise ValueError("Invalid file type. Only supported file types are allowed.")
+            save_path = os.path.join(self.session_path, filename)
+            with open(save_path, "wb") as f:
+                if hasattr(uploaded_file, "read"):
+                    f.write(uploaded_file.read())
+                else:
+                    f.write(uploaded_file.getbuffer())
+            log.info("File saved successfully", file=filename, save_path=save_path, session_id=self.session_id)
+            return save_path
+        except Exception as e:
+            log.error("Failed to save file", error=str(e), session_id=self.session_id)
+            raise DocumentPortalException(f"Failed to save file: {str(e)}", e) from e  
+         
     def save_uploaded_files(self, reference_file, actual_file):
         try:
             ref_path = self.session_path / reference_file.name
             act_path = self.session_path / actual_file.name
-            for fobj, out in ((reference_file, ref_path), (actual_file, act_path)):
-                if not fobj.name.lower().endswith(".pdf"):
-                    raise ValueError("Only PDF files are allowed.")
-                with open(out, "wb") as f:
-                    if hasattr(fobj, "read"):
-                        f.write(fobj.read())
-                    else:
-                        f.write(fobj.getbuffer())
+
+            self.save_file(reference_file)
+            self.save_file(actual_file)
             log.info("Files saved", reference=str(ref_path), actual=str(act_path), session=self.session_id)
             return ref_path, act_path
+            # for fobj, out in ((reference_file, ref_path), (actual_file, act_path)):
+            #     filename = getattr(fobj, "name", None)
+            #     if filename and Path(filename).suffix.lower() not in SUPPORTED_EXTENSIONS:
+            #         raise ValueError("Only supported file types are allowed.")
+                 
+            #     with open(out, "wb") as f:
+            #         if hasattr(fobj, "read"):
+            #             f.write(fobj.read())
+            #         else:
+            #             f.write(fobj.getbuffer())  # fallback
+
+
+            # log.info("Files saved", reference=str(ref_path), actual=str(act_path), session=self.session_id)
+            # return ref_path, act_path
         except Exception as e:
-            log.error("Error saving PDF files", error=str(e), session=self.session_id)
+            log.error("Error saving  files", error=str(e), session=self.session_id)
             raise DocumentPortalException("Error saving files", e) from e
 
-    def read_pdf(self, pdf_path: Path) -> str:
+    def read_file(self, file_path: Path) -> str:
         try:
-            with fitz.open(pdf_path) as doc:
+            if Path(file_path).suffix.lower() == ".csv":
+                return self.read_csv_file(file_path)
+            if Path(file_path).suffix.lower() == ".sql":
+                 return self.execute_sql_file(file_path)
+            if Path(file_path).suffix.lower() in  tuple(IMAGE_FILES) :
+                return self.read_image_file(file_path)
+            with fitz.open(file_path) as doc:
                 if doc.is_encrypted:
-                    raise ValueError(f"PDF is encrypted: {pdf_path.name}")
+                    raise ValueError(f"File is encrypted: {file_path.name}")
                 parts = []
                 for page_num in range(doc.page_count):
                     page = doc.load_page(page_num)
                     text = page.get_text()  # type: ignore
                     if text.strip():
                         parts.append(f"\n --- Page {page_num + 1} --- \n{text}")
-            log.info("PDF read successfully", file=str(pdf_path), pages=len(parts))
+            log.info("File read successfully", file=str(file_path), pages=len(parts))
             return "\n".join(parts)
         except Exception as e:
-            log.error("Error reading PDF", file=str(pdf_path), error=str(e))
-            raise DocumentPortalException("Error reading PDF", e) from e
+            log.error("Error reading file", file=str(file_path), error=str(e))
+            raise DocumentPortalException("Error reading file", e) from e
 
+    def read_csv_file(self, file_path: str) -> str:
+        try:
+            
+            text_chunks = []
+            df = pd.read_csv(file_path)
+            text_chunks = []
+
+            for i in range(0, len(df), 10):  # step by 10
+                page = df.iloc[i:i+10]
+                text_chunks.append(f"\n--- Page {i//10 + 1} ---\n{page.to_string(index=False)}")
+            text = "\n".join(text_chunks)
+            log.info("File read successfully", file_path=file_path, session_id=self.session_id, pages=len(text_chunks))
+            return text
+        except Exception as e:
+            log.error("Failed to read file", error=str(e), file_path=file_path, session_id=self.session_id)
+            raise DocumentPortalException(f"Could not process file: {file_path}", e) from e
+        
+    def execute_sql_file(self,file_path: str):
+        connection = sqlite3.connect('my_database.db')
+        with open(file_path, 'r', encoding='utf-8') as f:
+            sql_script = f.read()
+
+        cursor = connection.cursor()
+        cursor.executescript(sql_script)  # For SQLite
+        connection.commit()
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT name
+            FROM sqlite_master 
+            WHERE type='table' AND name NOT LIKE 'sqlite_%'
+        """)
+        tables = cursor.fetchall()  # Get all table names
+    
+        documents: list[Document] = []
+
+        for table in tables:
+            table_name = table[0]
+            try:
+                cursor.execute(f"SELECT * FROM {table_name}")
+                rows = cursor.fetchall()
+                columns = [desc[0] for desc in cursor.description]
+                for idx, row in enumerate(rows[:10], start=1):
+                    # Format each column-value pair with indentation for clarity
+                    content_lines = [f"{col}: {val}" for col, val in zip(columns, row)]
+                    content = "\n".join(content_lines)
+
+                    # Create Document with metadata including row index
+                    doc = Document(
+                        page_content=content,
+                        metadata={
+                            "source_table": table_name,
+                            "row_index": idx
+                        }
+                    )
+                    documents.append(doc)
+            except Exception as e:
+                print(f"Failed to fetch data from table '{table_name}': {e}")
+        cursor.close()    
+        connection.close()
+        return documents   
+    def preprocess_image(self, file_path):
+        img = cv2.imread(file_path)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
+        return Image.fromarray(thresh)
+
+    def read_image_file(self, file_path: str) -> str:
+        try:
+            # Load image
+            image = self.preprocess_image(file_path) #Image.open(file_path)
+
+            # Extract text using OCR
+            model = self.model_loader.load_img_reader_llm()
+            raw_text = model.generate_content([
+                        image,
+                        "Extract all visible text from this image. Include handwritten and printed text."
+                    ])
+
+            # raw_text = pytesseract.image_to_string(image)
+
+            # Split text into chunks of ~500 characters (adjust as needed)
+            wrapped_chunks = textwrap.wrap(raw_text.text, width=500)
+            text_chunks = []
+
+            for i, chunk in enumerate(wrapped_chunks):
+                text_chunks.append(f"\n--- Page {i + 1} ---\n{chunk}")
+
+            text = "\n".join(text_chunks)
+
+            log.info("Image read successfully", file_path=file_path, session_id=self.session_id, pages=len(text_chunks))
+            return text
+
+        except Exception as e:
+            log.error("Failed to read image", error=str(e), file_path=file_path, session_id=self.session_id)
+            raise DocumentPortalException(f"Could not process image: {file_path}", e) from e
+        
     def combine_documents(self) -> str:
         try:
             doc_parts = []
             for file in sorted(self.session_path.iterdir()):
-                if file.is_file() and file.suffix.lower() == ".pdf":
-                    content = self.read_pdf(file)
+                if file.is_file() and file.suffix.lower() in SUPPORTED_EXTENSIONS:               
+                    content = self.read_file(file)
                     doc_parts.append(f"Document: {file.name}\n{content}")
             combined_text = "\n\n".join(doc_parts)
             log.info("Documents combined", count=len(doc_parts), session=self.session_id)
@@ -283,3 +532,18 @@ class DocumentComparator:
             log.error("Error cleaning old sessions", error=str(e))
             raise DocumentPortalException("Error cleaning old sessions", e) from e
 
+if __name__ == "__main__":
+    #Path("sample.docx"), Path("sample.xlsx"), Path("sample.pptx"), Path("image1.png"
+    # ing = ChatIngestor()
+    # ing.built_retriver(paths)
+    # paths = [Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\image_text.webp"), Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\image_text.png")]
+    # doc= DocHandler ()
+    # text= doc.read_file(paths[0])
+    # print(text)
+    paths = [Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\english paper pattern.pdf"), Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\images with text\\image_text2.png")]
+    doc = DocumentComparator()
+    ref_path, act_path = doc.save_uploaded_files(paths[0],paths[1])
+    combined_text = doc.combine_documents()
+    # comp = DocumentComparatorLLM()
+    # text = comp.compare_documents(combined_text)
+    # print(text)
