@@ -32,7 +32,8 @@ packages = [
     "ecdsa",
     "passlib",
     "python-jose",
-    "redis"
+    "redis",
+    "pre-commit"
 ]
 for pkg in packages:
     try:

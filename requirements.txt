@@ -32,5 +32,6 @@ passlib==1.7.4
 python-jose==3.5.0
 redis==6.4.0
 ragas==0.3.3
+pre-commit==4.3.0
 
 -e .
