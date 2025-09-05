@@ -295,8 +295,8 @@ def read_image_file( file_path: str) -> str:
             log.error("Failed to read image", error=str(e), file_path=file_path)
             raise DocumentPortalException(f"Could not process image: {file_path}", e) from e
         
-if __name__ == "__main__":
-    paths = [Path("D:\LLMOPS Industry Projects\document_portal\data\titanic.sql")]
-    #Path("sample.docx"), Path("sample.xlsx"), Path("sample.pptx"), Path("image1.png"
-    docs = load_documents(paths)
+# if __name__ == "__main__":
+#     paths = [Path("D:\LLMOPS Industry Projects\document_portal\data\titanic.sql")]
+#     #Path("sample.docx"), Path("sample.xlsx"), Path("sample.pptx"), Path("image1.png"
+#     docs = load_documents(paths)
     
