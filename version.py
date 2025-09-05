@@ -33,7 +33,8 @@ packages = [
     "passlib",
     "python-jose",
     "redis",
-    "pre-commit"
+    "pre-commit",
+    "python-docx"
 ]
 for pkg in packages:
     try:
