@@ -1,10 +1,10 @@
 # tests/test_unit_cases.py
 
-import __main__
+
 import pytest
 from fastapi.testclient import TestClient
 # from api.main import app   # or your FastAPI entrypoint
-# from ..api.main import app
+from api.main import app
 import BytesIO
 
 from langchain.evaluation.qa import QAEvalChain
@@ -152,7 +152,7 @@ def test_chat_query_success(tmp_path, monkeypatch):
         assert data["engine"] == "LCEL-RAG"
 #--------------------Test Case-6-----------------------------
 # Test Case to check query with no session ID
-def test_chat_query_missing_session_id():
+def test_chat_query_missing_session_id():   
     form_data = {
         "question": "What is vector search?",
         "use_session_dirs": "true",
@@ -222,7 +222,7 @@ def deepEval_case_1():
     #     "contextual_accuracy": contextual_accuracy
     # }
 
-#--------------------Test Case-10----------------------------- 
+#--------------------Test Case-9----------------------------- 
 def find_deepEval(self, prompt: str, answer: str):
     """
     Find and return relevant DeepEval metrics for the given document text.
@@ -271,12 +271,3 @@ def find_deepEval(self, context:str, prompt:str, answer:str)-> str:
 #         self.log.error("DeepEval metrics extraction failed", error=str(e))
 #         raise DocumentPortalException("DeepEval metrics extraction failed") from e
 
-if __main__ == "__main__":
-    # test_login()
-     test_analyze_document_success()
-    # test_compare_documents_success()
-    # test_chat_build_index_success()
-    # test_chat_query_success()
-    # test_chat_query_missing_session_id()
-    # test_chat_query_index_not_found()
-    # deepEval_case_1()
