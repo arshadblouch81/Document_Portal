@@ -23,8 +23,15 @@ packages = [
     "docx",
     "python-pptx",
     "deepeval",
-    "jinja2"
-    
+    "jinja2",
+    "google-generativeai",
+    "Pillow",
+    "python-multipart",
+    "bcrypt",
+    "ecdsa",
+    "passlib",
+    "python-jose",
+    "redis"
 ]
 for pkg in packages:
     try:
