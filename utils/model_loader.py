@@ -15,8 +15,8 @@ from deepeval.metrics import TaskCompletionMetric
 from deepeval.integrations.langchain import CallbackHandler
 from deepeval.models import GPTModel
 from deepeval.tracing import observe
-from langchain_google_genai import GoogleGenerativeAI
-import google.generativeai as genai
+
+
 
 # from deepeval.models import GeminiModel
 # from deepeval.metrics import AnswerRelevancyMetric, ContextualAccuracyMetric
@@ -167,29 +167,29 @@ class ModelLoader:
         log.info("Loading LLM", provider=provider, model=model_name)
 
         if provider == "google":
-            genai.configure(api_key=self.api_key_mgr.get("GOOGLE_API_KEY"))
+            # genai.configure(api_key=self.api_key_mgr.get("GOOGLE_API_KEY"))
 
-            # ✅ Initialize model with positional argument
-            return genai.GenerativeModel(
-                model_name,  # e.g., "gemini-1.5-pro"
-                generation_config={
-                    "temperature": temperature,
-                    "max_output_tokens": max_tokens,
-                    "top_p": top_p,
-                    "top_k": top_k,
-                    "response_mime_type": response_mime_type
-                })
-
+            # # ✅ Initialize model with positional argument
             # return genai.GenerativeModel(
-            #     model=model_name,
-            #     google_api_key=self.api_key_mgr.get("GOOGLE_API_KEY"),
-            #     temperature=temperature,
-            #     max_output_tokens=max_tokens,
-            #     top_p = top_p,
-            #     top_k = top_k,
-            #     response_mime_type = response_mime_type,
-             
-            # )
+            #     model_name,  # e.g., "gemini-1.5-pro"
+            #     generation_config={
+            #         "temperature": temperature,
+            #         "max_output_tokens": max_tokens,
+            #         "top_p": top_p,
+            #         "top_k": top_k,
+            #         "response_mime_type": response_mime_type
+            #     })
+
+            return ChatGoogleGenerativeAI(
+                model=model_name,
+                google_api_key=self.api_key_mgr.get("GOOGLE_API_KEY"),
+                temperature=temperature,
+                max_output_tokens=max_tokens,
+                top_p=top_p,
+                top_k=top_k,
+                response_mime_type=response_mime_type,
+
+            )
            
 
 

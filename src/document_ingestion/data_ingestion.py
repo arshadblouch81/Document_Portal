@@ -1,4 +1,5 @@
 from __future__ import annotations
+import base64
 import io
 import os
 import sys
@@ -25,6 +26,7 @@ from PIL import Image
 import textwrap
 import cv2
 import numpy as np
+from langchain_core.messages import HumanMessage
 
 
 
@@ -296,28 +298,58 @@ class DocHandler:
         connection.close()
         return documents
 
+   
     def preprocess_image(self, file_path):
         img = cv2.imread(file_path)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
         return Image.fromarray(thresh)
 
+    def encode_image_to_base64(self, image: Image.Image, format="PNG") -> str:
+        buffered = io.BytesIO()
+        image.save(buffered, format=format)
+        img_bytes = buffered.getvalue()
+        img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+        return img_base64
+
     def read_image_file(self, file_path: str) -> str:
         try:
             # Load image
             image = self.preprocess_image(file_path) #Image.open(file_path)
+            pil_image = self.preprocess_image(file_path)
+            image_base64 = self.encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
 
-            # Extract text using OCR
+            # Optional: Embed as data URI
+            # data_uri = f"data:image/png;base64,{image_base64}"
+
+            # Construct multimodal message
+            mesage = HumanMessage(content=[
+                {
+                    "type": "text",
+                    "text": "Extract all visible text from this image. Include handwritten and printed text."
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/png;base64,{image_base64}"
+                    }
+                }
+            ])
             model = self.model_loader.load_img_reader_llm()
-            raw_text = model.generate_content([
-                        image,
-                        "Extract all visible text from this image. Include handwritten and printed text."
-                    ])
+            response = model.invoke([mesage])
+            raw_text = response.content
+
+            # # Extract text using OCR
+            # model = self.model_loader.load_img_reader_llm()
+            # raw_text = model.generate_content([
+            #             image,
+            #             "Extract all visible text from this image. Include handwritten and printed text."
+            #         ])
 
             # raw_text = pytesseract.image_to_string(image)
 
             # Split text into chunks of ~500 characters (adjust as needed)
-            wrapped_chunks = textwrap.wrap(raw_text.text, width=500)
+            wrapped_chunks = textwrap.wrap(raw_text, width=500)
             text_chunks = []
 
             for i, chunk in enumerate(wrapped_chunks):
@@ -472,28 +504,58 @@ class DocumentComparator:
         cursor.close()    
         connection.close()
         return documents   
+    
     def preprocess_image(self, file_path):
         img = cv2.imread(file_path)
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
         return Image.fromarray(thresh)
 
+    def encode_image_to_base64(self, image: Image.Image, format="PNG") -> str:
+        buffered = io.BytesIO()
+        image.save(buffered, format=format)
+        img_bytes = buffered.getvalue()
+        img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+        return img_base64
+
     def read_image_file(self, file_path: str) -> str:
         try:
             # Load image
             image = self.preprocess_image(file_path) #Image.open(file_path)
+            pil_image = self.preprocess_image(file_path)
+            image_base64 = self.encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
 
-            # Extract text using OCR
+            # Optional: Embed as data URI
+            # data_uri = f"data:image/png;base64,{image_base64}"
+
+            # Construct multimodal message
+            mesage = HumanMessage(content=[
+                {
+                    "type": "text",
+                    "text": "Extract all visible text from this image. Include handwritten and printed text."
+                },
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/png;base64,{image_base64}"
+                    }
+                }
+            ])
             model = self.model_loader.load_img_reader_llm()
-            raw_text = model.generate_content([
-                        image,
-                        "Extract all visible text from this image. Include handwritten and printed text."
-                    ])
+            response = model.invoke([mesage])
+            raw_text = response.content
+
+            # # Extract text using OCR
+            # model = self.model_loader.load_img_reader_llm()
+            # raw_text = model.generate_content([
+            #             image,
+            #             "Extract all visible text from this image. Include handwritten and printed text."
+            #         ])
 
             # raw_text = pytesseract.image_to_string(image)
 
             # Split text into chunks of ~500 characters (adjust as needed)
-            wrapped_chunks = textwrap.wrap(raw_text.text, width=500)
+            wrapped_chunks = textwrap.wrap(raw_text, width=500)
             text_chunks = []
 
             for i, chunk in enumerate(wrapped_chunks):
