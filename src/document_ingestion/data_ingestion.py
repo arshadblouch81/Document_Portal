@@ -594,7 +594,7 @@ class DocumentComparator:
             log.error("Error cleaning old sessions", error=str(e))
             raise DocumentPortalException("Error cleaning old sessions", e) from e
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     #Path("sample.docx"), Path("sample.xlsx"), Path("sample.pptx"), Path("image1.png"
     # ing = ChatIngestor()
     # ing.built_retriver(paths)
@@ -602,10 +602,10 @@ if __name__ == "__main__":
     # doc= DocHandler ()
     # text= doc.read_file(paths[0])
     # print(text)
-    paths = [Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\english paper pattern.pdf"), Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\images with text\\image_text2.png")]
-    doc = DocumentComparator()
-    ref_path, act_path = doc.save_uploaded_files(paths[0],paths[1])
-    combined_text = doc.combine_documents()
+    # paths = [Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\english paper pattern.pdf"), Path("D:\\LLMOPS Industry Projects\\document_portal\\data\\images with text\\image_text2.png")]
+    # doc = DocumentComparator()
+    # ref_path, act_path = doc.save_uploaded_files(paths[0],paths[1])
+    # combined_text = doc.combine_documents()
     # comp = DocumentComparatorLLM()
     # text = comp.compare_documents(combined_text)
     # print(text)
