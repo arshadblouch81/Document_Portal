@@ -4,6 +4,8 @@ ipykernel==6.30.0
 langchain_groq==0.3.6
 langchain_google_genai==2.1.10
 langchain-community==0.3.27
+langchain-openai==0.3.32
+openai==1.102.0
 faiss-cpu==1.11.0.post1
 structlog==25.4.0
 PyMuPDF==1.26.3
