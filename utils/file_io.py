@@ -8,8 +8,15 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import uuid
 from typing import Iterable, List
+
+import imageio
 from logger import GLOBAL_LOGGER as log
 from exception.custom_exception import DocumentPortalException
+import imageio
+import numpy as np
+from PIL import Image
+import io
+import base64
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
 IMAGE_FILES = {".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
@@ -78,3 +85,17 @@ def save_uploaded_files_old(uploaded_files: Iterable, target_dir: Path) -> List[
     except Exception as e:
         log.error("Failed to save uploaded files", error=str(e), dir=str(target_dir))
         raise DocumentPortalException("Failed to save uploaded files", e) from e
+    
+    
+
+def preprocess_image(file_path):
+    # Read image as NumPy array
+    img = imageio.imread(file_path)
+    return Image.fromarray(img)
+
+def encode_image_to_base64(image: Image.Image, format="PNG") -> str:
+    buffered = io.BytesIO()
+    image.save(buffered, format=format)
+    img_bytes = buffered.getvalue()
+    img_base64 = base64.b64encode(img_bytes).decode("utf-8")
+    return img_base64

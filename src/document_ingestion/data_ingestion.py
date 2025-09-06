@@ -7,6 +7,7 @@ import json
 # from turtle import pd
 import uuid
 import hashlib
+from instructor import Image
 import pandas as pd
 import shutil
 from pathlib import Path
@@ -18,16 +19,13 @@ from langchain_community.vectorstores import FAISS
 from utils.model_loader import ModelLoader
 from logger import GLOBAL_LOGGER as log
 from exception.custom_exception import DocumentPortalException
-from utils.file_io import generate_session_id, save_uploaded_files
+from utils.file_io import generate_session_id, save_uploaded_files, encode_image_to_base64,preprocess_image
 from utils.document_ops import load_documents
 import sqlite3
-import pytesseract
-from PIL import Image
 import textwrap
-import cv2
-import numpy as np
-from langchain_core.messages import HumanMessage
 
+from langchain_core.messages import HumanMessage
+import imageio
 
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
@@ -299,25 +297,13 @@ class DocHandler:
         return documents
 
    
-    def preprocess_image(self, file_path):
-        img = cv2.imread(file_path)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-        return Image.fromarray(thresh)
-
-    def encode_image_to_base64(self, image: Image.Image, format="PNG") -> str:
-        buffered = io.BytesIO()
-        image.save(buffered, format=format)
-        img_bytes = buffered.getvalue()
-        img_base64 = base64.b64encode(img_bytes).decode("utf-8")
-        return img_base64
+  
 
     def read_image_file(self, file_path: str) -> str:
         try:
             # Load image
-            image = self.preprocess_image(file_path) #Image.open(file_path)
-            pil_image = self.preprocess_image(file_path)
-            image_base64 = self.encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
+            pil_image = preprocess_image(file_path) #Image.open(file_path)
+            image_base64 = encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
 
             # Optional: Embed as data URI
             # data_uri = f"data:image/png;base64,{image_base64}"
@@ -505,25 +491,11 @@ class DocumentComparator:
         connection.close()
         return documents   
     
-    def preprocess_image(self, file_path):
-        img = cv2.imread(file_path)
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-        return Image.fromarray(thresh)
-
-    def encode_image_to_base64(self, image: Image.Image, format="PNG") -> str:
-        buffered = io.BytesIO()
-        image.save(buffered, format=format)
-        img_bytes = buffered.getvalue()
-        img_base64 = base64.b64encode(img_bytes).decode("utf-8")
-        return img_base64
-
     def read_image_file(self, file_path: str) -> str:
         try:
             # Load image
-            image = self.preprocess_image(file_path) #Image.open(file_path)
-            pil_image = self.preprocess_image(file_path)
-            image_base64 = self.encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
+            pil_image = preprocess_image(file_path)
+            image_base64 = encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
 
             # Optional: Embed as data URI
             # data_uri = f"data:image/png;base64,{image_base64}"

@@ -34,7 +34,8 @@ packages = [
     "python-jose",
     "redis",
     "pre-commit",
-    "python-docx"
+    "python-docx",
+    "opencv-python"
 ]
 for pkg in packages:
     try:

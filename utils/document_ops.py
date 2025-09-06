@@ -29,11 +29,10 @@ from docx import Document as DocxDocument
 import docx2txt
 import pandas as pd
 from pptx import Presentation
-import cv2
-import numpy as np
+from utils.file_io import  encode_image_to_base64,preprocess_image
 from utils.model_loader import ModelLoader
 from langchain_core.messages import HumanMessage
-import base64
+
 log = CustomLogger().get_logger(__name__)
 
 
@@ -229,23 +228,11 @@ def extract_images_from_pptx(path):
                 text = pytesseract.image_to_string(img)
                 texts.append(text)
     return texts
-def preprocess_image( file_path):
-    img = cv2.imread(file_path)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY)
-    return Image.fromarray(thresh)
-
-def encode_image_to_base64( image: Image.Image, format="PNG") -> str:
-    buffered = io.BytesIO()
-    image.save(buffered, format=format)
-    img_bytes = buffered.getvalue()
-    img_base64 = base64.b64encode(img_bytes).decode("utf-8")
-    return img_base64
 
 def read_image_file( file_path: str) -> str:
         try:
             # Load image
-            image = preprocess_image(file_path) #Image.open(file_path)
+            
             pil_image = preprocess_image(file_path)
             image_base64 = encode_image_to_base64(image=pil_image, format=pil_image.format or "PNG")
 
