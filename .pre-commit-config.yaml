@@ -1,7 +1,9 @@
+
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+  - repo: local
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
+      - id: pytest
+        name: pytest(unit tests)
+        entry: D://LLMOPS Industry Projects/document_portal/venv/Scripts/python.exe -m pytest -q -v tests/
+        language: system
+        pass_filenames: false
