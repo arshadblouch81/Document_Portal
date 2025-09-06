@@ -36,6 +36,7 @@ packages = [
     "pre-commit",
     "python-docx",
     "opencv-python"
+    "imageio"
 ]
 for pkg in packages:
     try:

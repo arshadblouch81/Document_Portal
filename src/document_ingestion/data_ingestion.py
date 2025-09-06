@@ -7,7 +7,6 @@ import json
 # from turtle import pd
 import uuid
 import hashlib
-from instructor import Image
 import pandas as pd
 import shutil
 from pathlib import Path
@@ -25,7 +24,7 @@ import sqlite3
 import textwrap
 
 from langchain_core.messages import HumanMessage
-import imageio
+
 
 
 SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
