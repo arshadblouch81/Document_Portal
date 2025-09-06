@@ -14,8 +14,14 @@ from langchain_core.globals import set_llm_cache
 from deepeval.metrics import TaskCompletionMetric
 from deepeval.integrations.langchain import CallbackHandler
 from deepeval.models import GPTModel
-from deepeval.tracing import observe
+from langchain.evaluation.qa import QAEvalChain
+from deepeval import evaluate
+from deepeval.metrics import AnswerRelevancyMetric
+from deepeval.test_case import LLMTestCase
 
+from datasets import Dataset 
+# from ragas import evaluate
+from ragas.metrics import faithfulness, answer_correctness
 
 
 # from deepeval.models import GeminiModel
@@ -213,6 +219,52 @@ class ModelLoader:
         else:
             log.error("Unsupported LLM provider", provider=provider)
             raise ValueError(f"Unsupported LLM provider: {provider}")
+    def find_deepEval(self, prompt: str, answer: str):
+        """
+        Find and return relevant DeepEval metrics for the given document text.
+        """
+        try:
+            evaluator = QAEvalChain.from_llm(llm=self.llm)
+
+            # Properly format examples and predictions
+            examples = [{"query": prompt, "answer": answer}]
+            predictions = [{"answer": answer}]
+
+            results = evaluator.evaluate(examples=examples, predictions=predictions)
+
+            self.log.info("DeepEval metrics extraction successful")
+            return results
+
+        except Exception as e:
+            self.log.error(f"DeepEval metrics extraction failed: {e}")
+            raise Exception("DeepEval metrics extraction failed") from e
+        
+
+    def find_deepEval2(self, context:str, prompt:str, answer:str)-> str:
+        """
+        Find and return relevant DeepEval metrics for the given document text.
+        """
+        try:
+            data_samples = {
+                'question': prompt,
+                'answer': answer,
+                'contexts': context,
+                'ground_truth': [
+                    'The first superbowl was held on January 15, 1967', 
+                    'The New England Patriots have won the Super Bowl a record six times'
+                ]
+            }
+
+            dataset = Dataset.from_dict(data_samples)
+
+            score = evaluate(dataset, metrics=[faithfulness, answer_correctness])                       
+            
+            self.log.info("DeepEval metrics extraction successful")
+            return score
+
+        except Exception as e:
+            self.log.error("DeepEval metrics extraction failed", error=str(e))
+            raise Exception("DeepEval metrics extraction failed") from e
 
 if __name__ == "__main__":
     # The `loader` object in the provided Python script is an instance of the `ModelLoader` class.
