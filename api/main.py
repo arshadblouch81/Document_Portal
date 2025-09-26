@@ -31,6 +31,8 @@ import redis
 from datetime import timedelta
 
 # redis_client = redis.Redis(host="localhost", port=8080, db=0, decode_responses=True)
+# access policy----------------
+
 redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
 
 def cache_token(token: str, username: str, expires_in: int = 900):
