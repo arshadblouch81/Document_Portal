@@ -16,7 +16,7 @@ from PIL import Image
 import io
 import base64
 
-SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
+SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".json", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
 IMAGE_FILES = {".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
 
 # ----------------------------- #

@@ -5,6 +5,7 @@ import textwrap
 from typing import Iterable, List
 
 from langchain.schema import Document
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 from logger.custom_logger import CustomLogger
 from exception.custom_exception import DocumentPortalException
 import sqlite3
@@ -36,21 +37,23 @@ from langchain_core.messages import HumanMessage
 log = CustomLogger().get_logger(__name__)
 
 
-SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql"}
+SUPPORTED_EXTENSIONS = {".pdf", ".docx", ".txt", ".md", ".ppt", ".pptx", ".xlsx", ".csv", ".sql", ".json", ".jpg", ".png", ".jpeg", ".gif", ".tiff", ".bmp", ".webp", ".svg"}
+
+from langchain_community.document_loaders import JSONLoader
 
 def load_documents(paths: Iterable[Path]) -> List[Document]:
     """Load docs using appropriate loader based on extension."""
     docs: List[Document] = []
     table_docs: List[Document] = []
     fig_docs: List[Document] = []
+
     try:
         for p in paths:
             ext = p.suffix.lower()
             loader = None
+
             if ext == ".pdf":
                 loader = PyPDFLoader(str(p))
-                # table_docs = extract_tables_from_pdf(str(p))
-                # fig_docs = extract_images_from_pdf(str(p))
             elif ext == ".docx":
                 loader = Docx2txtLoader(str(p))
             elif ext == ".txt":
@@ -67,16 +70,21 @@ def load_documents(paths: Iterable[Path]) -> List[Document]:
                 docs_list = load_sql_file(str(p))
                 docs.extend(docs_list)
                 continue
+            elif ext == ".json":
+                # Customize jq_schema based on your JSON structure
+                loader = JSONLoader(
+                    file_path=str(p),
+                    jq_schema=".[] | .content",  # Example: extract 'content' from each message
+                    text_content=False  # Set to True if you want raw text
+                )
             elif ext in [".png", ".jpg", ".jpeg", ".bmp", ".tiff"]:
-                # OCR for image files
-                # text = pytesseract.image_to_string(Image.open(p))
                 text = read_image_file(p)
                 docs.append(Document(page_content=text, metadata={"source": str(p)}))
                 continue
             else:
                 log.warning("Unsupported extension skipped", path=str(p))
                 continue
-            
+
             if loader:
                 docs.extend(loader.load())
             if table_docs:
@@ -90,7 +98,7 @@ def load_documents(paths: Iterable[Path]) -> List[Document]:
     except Exception as e:
         log.error("Failed loading documents", error=str(e))
         raise DocumentPortalException("Error loading documents", e) from e
-
+    
 def load_sql_file(file_path: str) -> str:
     conn = sqlite3.connect('my_database.db')
        
@@ -281,9 +289,37 @@ def read_image_file( file_path: str) -> str:
         except Exception as e:
             log.error("Failed to read image", error=str(e), file_path=file_path)
             raise DocumentPortalException(f"Could not process image: {file_path}", e) from e
-        
-# if __name__ == "__main__":
-#     paths = [Path("D:\LLMOPS Industry Projects\document_portal\data\titanic.sql")]
-#     #Path("sample.docx"), Path("sample.xlsx"), Path("sample.pptx"), Path("image1.png"
-#     docs = load_documents(paths)
+
+def split( docs: List[Document], chunk_size=1000, chunk_overlap=200) -> List[Document]:
+    splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    chunks = splitter.split_documents(docs)
+    log.info("Documents split", chunks=len(chunks), chunk_size=chunk_size, overlap=chunk_overlap)
+    return chunks       
+     
+if __name__ == "__main__":
+    paths = [Path("D:\LLMOPS Industry Projects\document_portal\data\email_text.json")]
+    #Path("sample.docx"), Path("sample.xlsx"), Path("sample.pptx"), Path("image1.png"
+    docs = load_documents(paths)
+    chunk_size: int = 1000
+    chunk_overlap: int = 200
+    k: int = 5
+    if not docs:
+        raise ValueError("No valid documents loaded")
     
+    chunks = split(docs, chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    
+    print(chunks[0])
+    
+    texts = [c.page_content for c in chunks]
+    metas = [c.metadata for c in chunks]
+    
+    
+    # try:
+    #     vs = fm.load_or_create(texts=texts, metadatas=metas)
+    # except Exception:
+    #     vs = fm.load_or_create(texts=texts, metadatas=metas)
+        
+    # added = fm.add_documents(chunks)
+    # # log.info("FAISS index updated", added=added, index=str(self.faiss_dir))
+
+    # retriever = vs.as_retriever(search_type="similarity", search_kwargs={"k": k})

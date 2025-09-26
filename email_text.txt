@@ -1,0 +1,154 @@
+
+LangGraph Chatbot
+
+My Conversations
+
+
+what is capital of Pakistan
+google.protobuf.json_format.ParseError: Failed to parse properties field: Failed to parse properties field: Failed to parse properties field: Failed to parse anyOf field: Failed to parse anyOf field: Failed to parse type field: Invalid enum value string for enum type google.ai.generativelanguage.v1beta.Type at Schema.properties[state].properties[messages].items.properties[content].anyOf[1].items.anyOf[0].type......
+Traceback:
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\streamlit\runtime\scriptrunner\exec_code.py", line 128, in exec_func_with_error_handling
+    result = func()
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\streamlit\runtime\scriptrunner\script_runner.py", line 669, in code_to_exec
+    exec(code, module.__dict__)  # noqa: S102
+    ~~~~^^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\streamlit_frontend_tool.py", line 142, in <module>
+    ai_message = st.write_stream(ai_only_stream())
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\streamlit\runtime\metrics_util.py", line 443, in wrapped_func
+    result = non_optional_func(*args, **kwargs)
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\streamlit\elements\write.py", line 189, in write_stream
+    for chunk in stream:  # type: ignore
+                 ^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\streamlit_frontend_tool.py", line 119, in ai_only_stream
+    for message_chunk, metadata in chatbot.stream(
+                                   ~~~~~~~~~~~~~~^
+        {"messages": [HumanMessage(content=user_input)]},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        config=CONFIG,
+        ^^^^^^^^^^^^^^
+        stream_mode="messages",
+        ^^^^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\pregel\main.py", line 2647, in stream
+    for _ in runner.tick(
+             ~~~~~~~~~~~^
+        [t for t in loop.tasks.values() if not t.writes],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        schedule_task=loop.accept_push,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\pregel\_runner.py", line 253, in tick
+    _panic_or_proceed(
+    ~~~~~~~~~~~~~~~~~^
+        futures.done.union(f for f, t in futures.items() if t is not None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        panic=reraise,
+        ^^^^^^^^^^^^^^
+    )
+    ^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\pregel\_runner.py", line 511, in _panic_or_proceed
+    raise exc
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\pregel\_executor.py", line 81, in done
+    task.result()
+    ~~~~~~~~~~~^^
+File "C:\Users\Arshad\miniconda3\Lib\concurrent\futures\_base.py", line 449, in result
+    return self.__get_result()
+           ~~~~~~~~~~~~~~~~~^^
+File "C:\Users\Arshad\miniconda3\Lib\concurrent\futures\_base.py", line 401, in __get_result
+    raise self._exception
+File "C:\Users\Arshad\miniconda3\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\pregel\_retry.py", line 42, in run_with_retry
+    return task.proc.invoke(task.input, config)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 657, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langgraph\_internal\_runnable.py", line 401, in invoke
+    ret = self.func(*args, **kwargs)
+File "D:\LLMOPS Industry Projects\document_portal\src\chatbot\langgraph_tool_backend.py", line 123, in chat_node
+    response = self.llm_with_tools.invoke(messages)
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_core\runnables\base.py", line 5495, in invoke
+    return self.bound.invoke(
+           ~~~~~~~~~~~~~~~~~^
+        input,
+        ^^^^^^
+        self._merge_configs(config),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        **{**self.kwargs, **kwargs},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\chat_models.py", line 1490, in invoke
+    return super().invoke(input, config, stop=stop, **kwargs)
+           ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_core\language_models\chat_models.py", line 393, in invoke
+    self.generate_prompt(
+    ~~~~~~~~~~~~~~~~~~~~^
+        [self._convert_input(input)],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    ).generations[0][0],
+    ^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1019, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_core\language_models\chat_models.py", line 837, in generate
+    self._generate_with_cache(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        m,
+        ^^
+    ...<2 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_core\language_models\chat_models.py", line 1074, in _generate_with_cache
+    for chunk in self._stream(messages, stop=stop, **kwargs):
+                 ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\chat_models.py", line 1670, in _stream
+    request = self._prepare_request(
+        messages,
+    ...<8 lines>...
+        **kwargs,
+    )
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\chat_models.py", line 1798, in _prepare_request
+    formatted_tools = [convert_to_genai_function_declarations(tools)]
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\_function_utils.py", line 170, in convert_to_genai_function_declarations
+    fd = _format_to_gapic_function_declaration(tool)  # type: ignore[arg-type]
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\_function_utils.py", line 244, in _format_to_gapic_function_declaration
+    return _format_dict_to_function_declaration(cast(FunctionDescription, function))
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\_function_utils.py", line 128, in _format_dict_to_function_declaration
+    parameters=_dict_to_gapic_schema(tool.get("parameters", {})),
+               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\langchain_google_genai\_function_utils.py", line 118, in _dict_to_gapic_schema
+    return gapic.Schema.from_json(json_schema)
+           ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\proto\message.py", line 549, in from_json
+    Parse(payload, instance._pb, ignore_unknown_fields=ignore_unknown_fields)
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\google\protobuf\json_format.py", line 465, in Parse
+    raise e
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\google\protobuf\json_format.py", line 461, in Parse
+    return ParseDict(
+        js, message, ignore_unknown_fields, descriptor_pool, max_recursion_depth
+    )
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\google\protobuf\json_format.py", line 495, in ParseDict
+    parser.ConvertMessage(js_dict, message, '')
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\google\protobuf\json_format.py", line 540, in ConvertMessage
+    self._ConvertFieldValuePair(value, message, path)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+File "D:\LLMOPS Industry Projects\document_portal\venv\Lib\site-packages\google\protobuf\json_format.py", line 692, in _ConvertFieldValuePair
+    raise ParseError(
+        'Failed to parse {0} field: {1}.'.format(name, e)
+    ) from e
+Copy
+Ask Google
+Ask ChatGPT
+Type here

@@ -36,7 +36,11 @@ packages = [
     "pre-commit",
     "python-docx",
     "opencv-python"
-    "imageio"
+    "imageio",
+    "langgraph",
+    "langgraph-checkpoint-sqlite",
+    "duckduckgo-search",
+    "jq"
 ]
 for pkg in packages:
     try:

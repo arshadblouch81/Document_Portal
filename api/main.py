@@ -224,8 +224,8 @@ async def compare_documents(reference: UploadFile = File(...), actual: UploadFil
 @app.post("/chat/index")
 async def chat_build_index(
     files: List[UploadFile] = File(...),
-    session_id: Optional[str] = Form(None),
-    use_session_dirs: bool = Form(True),
+    session_id: Optional[str] = None,
+    use_session_dirs: bool = Form(False),
     chunk_size: int = Form(1000),
     chunk_overlap: int = Form(200),
     k: int = Form(5),
@@ -255,7 +255,7 @@ async def chat_query(
     question: str = Form(...),
     session_id: Optional[str] = Form(None),
     use_session_dirs: bool = Form(True),
-    k: int = Form(5),
+    k: int = Form(25),
 ) -> Any:
     try:
         if use_session_dirs and not session_id:

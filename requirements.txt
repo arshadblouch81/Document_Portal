@@ -34,4 +34,9 @@ ragas==0.3.3
 pre-commit==4.3.0
 imageio==2.37.0
 Pillow==11.3.0
+langgraph==0.6.6
+langgraph-checkpoint-sqlite==2.0.11
+duckduckgo-search==8.1.1
+jq==1.10.0
+
 -e .
