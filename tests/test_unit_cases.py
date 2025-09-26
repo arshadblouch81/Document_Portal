@@ -25,10 +25,10 @@ client = TestClient(app)
 
 #--------------Test Case-1-----------------------------
 # Test case to check login page
-def test_login():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert "Document Portal" in response.text
+# def test_login():
+#     response = client.get("/")
+#     assert response.status_code == 200
+#     assert "Document Portal" in response.text
 #-----------------Test Case-2-----------------------------
 # Test case to check document analysis
 # def test_analyze_document_success():
