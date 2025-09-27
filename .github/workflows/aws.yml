@@ -5,7 +5,7 @@ on:
    pull_request:
       branches: [main]
 env:
-  AWS_REGION: ap-southeast-2
+  AWS_REGION: eu-north-1
   ECR_REPOSITORY: documentportal
   ECS_SERVICE: document-portal-service
   ECS_CLUSTER: document-portal-cluster
